@@ -1,0 +1,308 @@
+
+<style>
+  .wrap { padding: 1rem 0; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .filter-btn { font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-secondary); cursor: pointer; transition: all 0.15s; }
+  .filter-btn.active { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); font-weight: 500; }
+  .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; margin: 1.5rem 0 0.75rem; border-top: 0.5px solid var(--color-border-tertiary); padding-top: 1rem; }
+  .section-label:first-of-type { margin-top: 0; border-top: none; padding-top: 0; }
+  .feature-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px 16px; margin-bottom: 10px; display: grid; grid-template-columns: 1fr auto; gap: 8px; cursor: pointer; transition: border-color 0.15s; }
+  .feature-card:hover { border-color: var(--color-border-secondary); }
+  .feature-card.expanded { border-color: var(--color-border-primary); }
+  .feature-card[data-hidden="true"] { display: none; }
+  .feat-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .feat-num { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); min-width: 20px; }
+  .feat-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .feat-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; grid-column: 1 / -1; }
+  .feat-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; grid-column: 1 / -1; }
+  .pill { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .pill-wow  { background: #EEEDFE; color: #3C3489; }
+  .pill-easy { background: #EAF3DE; color: #27500A; }
+  .pill-med  { background: #FAEEDA; color: #633806; }
+  .pill-hard { background: #FCEBEB; color: #791F1F; }
+  .pill-cat  { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); }
+  .badges-col { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+  .wow-bar-wrap { display: flex; align-items: center; gap: 6px; }
+  .wow-label { font-size: 11px; color: var(--color-text-tertiary); white-space: nowrap; }
+  .wow-bar { height: 4px; border-radius: 2px; background: var(--color-border-tertiary); width: 60px; overflow: hidden; }
+  .wow-fill { height: 100%; border-radius: 2px; background: #7F77DD; }
+  .impl { display: none; grid-column: 1 / -1; margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--color-border-tertiary); }
+  .impl.show { display: block; }
+  .impl-title { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 8px; }
+  .step-list { list-style: none; padding: 0; margin: 0; }
+  .step-list li { display: flex; gap: 10px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; padding: 4px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .step-list li:last-child { border-bottom: none; }
+  .step-n { font-weight: 500; color: var(--color-text-info); min-width: 18px; }
+  .expand-icon { font-size: 16px; color: var(--color-text-tertiary); line-height: 1; align-self: start; margin-top: 2px; transition: transform 0.2s; }
+  .expand-icon.open { transform: rotate(45deg); }
+  .summary-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+  .sum-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 14px; }
+  .sum-n { font-size: 22px; font-weight: 500; color: var(--color-text-primary); line-height: 1; }
+  .sum-l { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
+</style>
+
+<div class="wrap">
+  <h2 class="sr-only">AlphaFour AI Expo feature plan — 12 features with implementation steps</h2>
+
+  <div class="summary-bar">
+    <div class="sum-card"><div class="sum-n">12</div><div class="sum-l">New features</div></div>
+    <div class="sum-card"><div class="sum-n" style="color:#27500A">5</div><div class="sum-l">Quick wins (1–2 days)</div></div>
+    <div class="sum-card"><div class="sum-n" style="color:#633806">4</div><div class="sum-l">Medium effort (3–5 days)</div></div>
+    <div class="sum-card"><div class="sum-n" style="color:#791F1F">3</div><div class="sum-l">Big bets (1–2 weeks)</div></div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterCards('all', this)">All</button>
+    <button class="filter-btn" onclick="filterCards('quick', this)">Quick wins</button>
+    <button class="filter-btn" onclick="filterCards('medium', this)">Medium effort</button>
+    <button class="filter-btn" onclick="filterCards('hard', this)">Big bets</button>
+    <button class="filter-btn" onclick="filterCards('visual', this)">Visuals</button>
+    <button class="filter-btn" onclick="filterCards('ai', this)">AI/Algorithm</button>
+    <button class="filter-btn" onclick="filterCards('edu', this)">Education</button>
+  </div>
+
+  <div id="cards-root"></div>
+</div>
+
+<script>
+const features = [
+  {
+    id: 1, title: "Replay & move history timeline", effort: "quick", cat: ["visual","edu"],
+    wow: 4,
+    desc: "Record every move and let expo visitors scrub through the entire game like a video. Shows the AI's evolving tree at each past state.",
+    steps: [
+      "Store each board state in a history array after every move",
+      "Add a horizontal timeline scrubber (input[type=range]) below the board",
+      "On scrub, replay the board and re-render the saved tree for that turn",
+      "Add Previous / Next buttons and a Play button for auto-replay at 1s intervals",
+      "Highlight the move made at each step with a glowing ring on the disc"
+    ]
+  },
+  {
+    id: 2, title: "Side-by-side AI vs AI mode", effort: "quick", cat: ["ai","visual"],
+    wow: 5,
+    desc: "Pit two Minimax instances against each other at different depths — watch how depth 4 vs depth 7 plays out. Instantly the most crowd-pleasing demo at any expo.",
+    steps: [
+      "Add an 'AI vs AI' toggle in the control panel",
+      "On each turn, run the opposite depth Minimax for the opponent",
+      "Alternate turns automatically with a configurable delay (500ms default)",
+      "Show both search trees side by side, updating simultaneously",
+      "Display a win/draw counter that increments across multiple auto-played games"
+    ]
+  },
+  {
+    id: 3, title: "Animated node-by-node tree build", effort: "quick", cat: ["visual","edu"],
+    wow: 5,
+    desc: "Instead of the tree appearing all at once, animate each node appearing one by one as the algorithm visits it — like watching the AI think in real time.",
+    steps: [
+      "Collect tree nodes in visit order during Minimax execution",
+      "Render nodes with opacity 0 initially, then use CSS keyframes to fade each in",
+      "Stagger the animation delay by visit index × 20ms",
+      "Add a speed slider (Slow / Medium / Fast / Instant) to control stagger timing",
+      "Highlight the currently-being-evaluated node with a pulsing amber ring"
+    ]
+  },
+  {
+    id: 4, title: "Opening book & known positions", effort: "quick", cat: ["ai","edu"],
+    wow: 3,
+    desc: "Hard-code the first 3–4 moves from optimal Connect 4 theory. Show a badge 'Book move' when the AI plays a known opening, demonstrating that real game AIs combine search with memorized theory.",
+    steps: [
+      "Add a bookMoves object mapping board hash → best column for common openings",
+      "Before running Minimax, check if the board state matches a book entry",
+      "If matched, play immediately and show a 'Book move' badge with the move name",
+      "Include ~10 common openings (e.g. centre, double-threat setups)",
+      "Show 'Searching...' badge when book has no match and Minimax takes over"
+    ]
+  },
+  {
+    id: 5, title: "Heuristic score heatmap overlay", effort: "quick", cat: ["visual","edu"],
+    wow: 4,
+    desc: "Toggle a color overlay on the board that shades each column by the AI's evaluated score — green for good columns, red for bad ones. Makes the AI's reasoning visually obvious at a glance.",
+    steps: [
+      "After each AI turn, call heuristic(simulateMove(board, col)) for each column",
+      "Normalise scores to 0–1 range across the 7 columns",
+      "Render semi-transparent colored rectangles over each column (green → red)",
+      "Add a 'Show heatmap' toggle button above the board",
+      "Animate the heatmap fading in/out on toggle with a 200ms CSS transition"
+    ]
+  },
+  {
+    id: 6, title: "Iterative deepening visualizer", effort: "medium", cat: ["ai","edu","visual"],
+    wow: 4,
+    desc: "Show the AI searching at depth 1, then 2, then 3... progressively. Each round's best move updates in real time — visitors can see how confidence grows with depth.",
+    steps: [
+      "Wrap Minimax in an outer loop from depth 1 to maxDepth",
+      "After each depth completes, post an intermediate result to the UI",
+      "Show a 'Current best: column X (depth N)' live readout that updates each round",
+      "Animate the tree expanding level by level between depth iterations",
+      "Add a depth progress indicator (e.g. depth 1/6 → 2/6 → ... → 6/6)"
+    ]
+  },
+  {
+    id: 7, title: "Threat detection highlights", effort: "medium", cat: ["visual","edu"],
+    wow: 4,
+    desc: "Highlight on the board where the AI detected a 3-in-a-row threat (offensive or defensive). Draws dotted arrows to the blocking/winning move. Judges immediately understand the heuristic.",
+    steps: [
+      "During heuristic evaluation, record all found threat windows (position + type)",
+      "After AI move, overlay dotted rectangles around offensive and defensive threats",
+      "Use amber for AI threats, red for player threats, green for winning moves",
+      "Show a small tooltip on hover over each highlight explaining why it scored high",
+      "Clear highlights when the next move starts"
+    ]
+  },
+  {
+    id: 8, title: "Pruning efficiency live graph", effort: "medium", cat: ["visual","ai"],
+    wow: 4,
+    desc: "A real-time bar or line chart that shows nodes evaluated vs nodes pruned across all moves of the game. Visually proves alpha-beta's exponential savings as the game progresses.",
+    steps: [
+      "After each AI move, record { move, evaluated, pruned, depth, time } to a history array",
+      "Render a grouped bar chart using Chart.js with evaluated vs pruned per move",
+      "Overlay a line showing pruning efficiency (%) on a secondary Y axis",
+      "Animate bars growing from 0 on each new data point",
+      "Add a 'Reset stats' button and a CSV export of the stats data"
+    ]
+  },
+  {
+    id: 9, title: "Algorithm comparison mode", effort: "medium", cat: ["ai","edu"],
+    wow: 5,
+    desc: "Run Minimax WITH and WITHOUT alpha-beta pruning simultaneously on the same position. Show both trees side by side and the difference in node count. The single most impressive educational demo possible.",
+    steps: [
+      "Implement a second minimax variant with alpha-beta disabled (pure minimax)",
+      "Add a 'Compare' toggle that runs both algorithms on each AI turn",
+      "Render two tree panels: left = pure Minimax, right = Alpha-Beta",
+      "Show a difference counter: 'Alpha-Beta saved X nodes (Y%) this move'",
+      "Animate a winner badge on the Alpha-Beta side each turn"
+    ]
+  },
+  {
+    id: 10, title: "Explain this move (AI narrator)", effort: "hard", cat: ["ai","edu"],
+    wow: 5,
+    desc: "After every AI move, generate a plain-English explanation of why it chose that column — referencing the threats found, the score difference, and whether it blocked or attacked. Uses the Anthropic API.",
+    steps: [
+      "After AI move, collect: chosen column, top 3 alternatives, heuristic breakdown, threats found",
+      "Send this data to the Claude API with a prompt: 'Explain this Connect 4 move in 2 sentences for a student'",
+      "Display the explanation in a speech bubble next to the AI disc",
+      "Cache explanations to avoid re-calling for repeated positions",
+      "Add a 'Deeper explanation' button that expands the full heuristic breakdown"
+    ]
+  },
+  {
+    id: 11, title: "Difficulty auto-calibration", effort: "hard", cat: ["ai"],
+    wow: 3,
+    desc: "Track how many moves the player has survived and dynamically adjust AI depth to keep games competitive. Like Elo — the AI gets harder if you win, easier if you lose quickly.",
+    steps: [
+      "Maintain a player 'skill rating' starting at 1000",
+      "After each game, +50 rating if player wins, −30 if AI wins in <10 moves",
+      "Map rating ranges to AI depth: <800 = depth 2, 800–1000 = depth 4, 1000+ = depth 6+",
+      "Show the current difficulty level and rating in the control panel",
+      "Add a smooth depth transition animation when difficulty changes between games"
+    ]
+  },
+  {
+    id: 12, title: "Multiplayer (local + online)", effort: "hard", cat: ["visual"],
+    wow: 5,
+    desc: "Local 2-player mode for expo visitors to play each other on the same device. Optionally add real-time online play via WebSockets — two people can play from different phones, both watching the same tree.",
+    steps: [
+      "Add a 'Human vs Human' mode that disables Minimax and alternates click turns",
+      "Show player name inputs at game start; display names in the status bar",
+      "For online mode: set up a simple WebSocket server (Partykit or Socket.io on Vercel)",
+      "Sync board state between two clients; only the active player's clicks are processed",
+      "Show a shareable game link that the opponent can open on their device"
+    ]
+  }
+];
+
+const effortMap = { quick: 'quick', medium: 'medium', hard: 'hard' };
+
+function pillEffort(e) {
+  if (e === 'quick') return '<span class="pill pill-easy">1–2 days</span>';
+  if (e === 'medium') return '<span class="pill pill-med">3–5 days</span>';
+  return '<span class="pill pill-hard">1–2 weeks</span>';
+}
+
+function catPills(cats) {
+  const labels = { visual: 'Visuals', ai: 'AI / Algorithm', edu: 'Education' };
+  return cats.map(c => `<span class="pill pill-cat">${labels[c]}</span>`).join('');
+}
+
+function wowBar(n) {
+  return `<div class="wow-bar-wrap"><span class="wow-label">Wow</span><div class="wow-bar"><div class="wow-fill" style="width:${n*20}%"></div></div></div>`;
+}
+
+function render() {
+  const root = document.getElementById('cards-root');
+  const groups = [
+    { key: 'quick', label: 'Quick wins — 1 to 2 days each' },
+    { key: 'medium', label: 'Medium effort — 3 to 5 days each' },
+    { key: 'hard', label: 'Big bets — 1 to 2 weeks each' }
+  ];
+  root.innerHTML = groups.map(g => {
+    const items = features.filter(f => f.effort === g.key);
+    return `<div class="section-label" data-group="${g.key}">${g.label}</div>` +
+      items.map(f => `
+        <div class="feature-card" id="card-${f.id}" data-effort="${f.effort}" data-cats="${f.cat.join(',')}" onclick="toggle(${f.id})">
+          <div>
+            <div class="feat-top">
+              <span class="feat-num">${f.id}.</span>
+              <span class="feat-title">${f.title}</span>
+            </div>
+            <div class="feat-desc">${f.desc}</div>
+            <div class="feat-meta">
+              ${pillEffort(f.effort)}
+              ${catPills(f.cat)}
+            </div>
+            <div class="impl" id="impl-${f.id}">
+              <div class="impl-title">Implementation steps</div>
+              <ol class="step-list">
+                ${f.steps.map((s,i) => `<li><span class="step-n">${i+1}</span><span>${s}</span></li>`).join('')}
+              </ol>
+              <div style="margin-top:10px">
+                <button onclick="event.stopPropagation();sendPrompt('Give me the full code for feature #${f.id}: ${f.title} in AlphaFour (Next.js 14 + TypeScript)')" style="font-size:12px;padding:5px 12px;">Get the code for this feature ↗</button>
+              </div>
+            </div>
+          </div>
+          <div class="badges-col">
+            ${wowBar(f.wow)}
+            <span class="expand-icon" id="icon-${f.id}">+</span>
+          </div>
+        </div>`).join('');
+  }).join('');
+}
+
+function toggle(id) {
+  const impl = document.getElementById('impl-'+id);
+  const icon = document.getElementById('icon-'+id);
+  const card = document.getElementById('card-'+id);
+  const open = impl.classList.toggle('show');
+  card.classList.toggle('expanded', open);
+  icon.classList.toggle('open', open);
+  icon.textContent = open ? '+' : '+';
+}
+
+function filterCards(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  features.forEach(f => {
+    const card = document.getElementById('card-'+f.id);
+    let show = true;
+    if (type === 'quick') show = f.effort === 'quick';
+    else if (type === 'medium') show = f.effort === 'medium';
+    else if (type === 'hard') show = f.effort === 'hard';
+    else if (type === 'visual') show = f.cat.includes('visual');
+    else if (type === 'ai') show = f.cat.includes('ai');
+    else if (type === 'edu') show = f.cat.includes('edu');
+    card.dataset.hidden = (!show).toString();
+  });
+  document.querySelectorAll('.section-label').forEach(lbl => {
+    const group = lbl.dataset.group;
+    const groupCards = features.filter(f => f.effort === group);
+    const anyVisible = groupCards.some(f => {
+      const card = document.getElementById('card-'+f.id);
+      return card.dataset.hidden !== 'true';
+    });
+    lbl.style.display = anyVisible ? '' : 'none';
+  });
+}
+
+render();
+</script>

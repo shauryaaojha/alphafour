@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlphaFour — Connect 4 AI Poster</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #050505;
+    --surface: #131313;
+    --surface2: #1C1B1B;
+    --border: rgba(71,71,71,0.3);
+    --red: #e63946;
+    --amber: #f4a261;
+    --green: #06d6a0;
+    --blue: #4361ee;
+    --pruned: #474747;
+    --text: #ffffff;
+    --muted: #919191;
+    --mono: 'JetBrains Mono', monospace;
+    --display: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: var(--display);
+    width: 794px;
+    min-height: 1123px;
+    margin: 0 auto;
+    padding: 36px 36px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Dot grid bg */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  * { position: relative; z-index: 1; }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+    margin-bottom: 22px;
+  }
+
+  .header-left { display: flex; flex-direction: column; gap: 4px; }
+
+  .logo {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    background: linear-gradient(90deg, #e63946 0%, #f4a261 50%, #06d6a0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .tagline {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .team-block {
+    text-align: right;
+  }
+
+  .team-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+
+  .team-names {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .faculty-line {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .faculty-line span {
+    color: var(--amber);
+  }
+
+  /* ── THREE-COL MID ── */
+  .mid {
+    display: grid;
+    grid-template-columns: 1fr 1.05fr 1.15fr;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .card-title {
+    font-size: 10px;
+    font-family: var(--mono);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-title span {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  /* Problem card */
+  .prob-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .prob-body {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: #b0aec8;
+    line-height: 1.65;
+    margin-bottom: 10px;
+  }
+
+  .trait-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 8px;
+  }
+
+  .trait {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text);
+  }
+
+  .trait-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Board visual */
+  .board-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .board-status {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--green);
+    background: rgba(6,214,160,0.1);
+    border: 1px solid rgba(6,214,160,0.25);
+    border-radius: 4px;
+    padding: 3px 10px;
+    letter-spacing: 0.08em;
+  }
+
+  .board-grid {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .board-row { display: flex; gap: 5px; margin-bottom: 5px; }
+  .board-row:last-child { margin-bottom: 0; }
+
+  .cell {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--navy);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+    position: relative;
+  }
+
+  .cell.red { background: radial-gradient(circle at 35% 35%, #ff6b78, var(--red)); box-shadow: 0 0 8px rgba(230,57,70,0.4); }
+  .cell.amber { background: radial-gradient(circle at 35% 35%, #ffcc99, var(--amber)); box-shadow: 0 0 8px rgba(244,162,97,0.4); }
+  .cell.win { animation: pulse 1.2s infinite; }
+
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 8px rgba(6,214,160,0.6); }
+    50% { box-shadow: 0 0 18px rgba(6,214,160,1); }
+  }
+
+  .col-labels {
+    display: flex;
+    gap: 5px;
+    padding: 0 8px;
+  }
+
+  .col-label {
+    width: 28px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+  }
+
+  /* Algorithm card */
+  .algo-section { margin-bottom: 12px; }
+
+  .algo-heading {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .algo-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .pseudocode {
+    font-family: var(--mono);
+    font-size: 8.5px;
+    line-height: 1.7;
+    color: #b0aec8;
+    background: rgba(0,0,0,0.2);
+    border-radius: 6px;
+    padding: 10px 12px;
+    border-left: 2px solid var(--blue);
+    margin-bottom: 8px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow: hidden;
+  }
+
+  .kw { color: #c084fc; }
+  .fn { color: #60a5fa; }
+  .cm { color: var(--muted); }
+  .val { color: var(--green); }
+  .cond { color: var(--amber); }
+
+  /* ── FLOW SECTION ── */
+  .flow-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+
+  .flow-title {
+    font-size: 10px;
+    font-family: var(--mono);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .flow-title span { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); }
+
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    justify-content: space-between;
+  }
+
+  .flow-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 76px;
+  }
+
+  .flow-box {
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid;
+    line-height: 1.3;
+    width: 100%;
+  }
+
+  .flow-sub {
+    font-family: var(--mono);
+    font-size: 8.5px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .flow-arrow {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1;
+    flex-shrink: 0;
+    margin: 0 2px;
+    padding-bottom: 14px;
+  }
+
+  .fn-player  { background: rgba(230,57,70,0.1);   border-color: rgba(230,57,70,0.4);   color: var(--red); }
+  .fn-board   { background: rgba(67,97,238,0.1);   border-color: rgba(67,97,238,0.4);   color: #7b9cf0; }
+  .fn-max     { background: rgba(244,162,97,0.1);  border-color: rgba(244,162,97,0.4);  color: var(--amber); }
+  .fn-min     { background: rgba(67,97,238,0.1);   border-color: rgba(67,97,238,0.4);   color: #7b9cf0; }
+  .fn-prune   { background: rgba(74,74,106,0.2);   border-color: rgba(74,74,106,0.6);   color: var(--muted); }
+  .fn-leaf    { background: rgba(6,214,160,0.08);  border-color: rgba(6,214,160,0.3);   color: var(--green); }
+  .fn-pick    { background: rgba(244,162,97,0.15); border-color: rgba(244,162,97,0.5);  color: var(--amber); }
+
+  /* ── BOTTOM TWO-COL ── */
+  .bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .syllabus-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .syllabus-item {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1.5;
+    color: #b0aec8;
+    padding: 5px 8px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+  }
+
+  .unit-pill {
+    flex-shrink: 0;
+    font-size: 8.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+
+  .u1 { background: rgba(230,57,70,0.15); color: var(--red); }
+  .u2 { background: rgba(244,162,97,0.15); color: var(--amber); }
+  .u3 { background: rgba(6,214,160,0.15); color: var(--green); }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-box {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 12px;
+  }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 3px;
+  }
+
+  .stat-val {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .stat-sub {
+    font-family: var(--mono);
+    font-size: 8.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* tree mini */
+  .tree-mini {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 0;
+  }
+
+  .tree-level { display: flex; gap: 8px; justify-content: center; }
+
+  .tnode {
+    border-radius: 5px;
+    padding: 4px 7px;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    border: 1px solid;
+    text-align: center;
+    min-width: 52px;
+  }
+
+  .tnode-max  { background: rgba(244,162,97,0.15); border-color: rgba(244,162,97,0.5); color: var(--amber); }
+  .tnode-min  { background: rgba(67,97,238,0.15);  border-color: rgba(67,97,238,0.5);  color: #7b9cf0; }
+  .tnode-best { background: rgba(6,214,160,0.12);  border-color: rgba(6,214,160,0.5);  color: var(--green); }
+  .tnode-prune{ background: rgba(74,74,106,0.15);  border-color: rgba(74,74,106,0.4);  color: var(--muted); opacity: 0.6; }
+
+  .tree-score {
+    font-size: 8px;
+    opacity: 0.7;
+    display: block;
+    font-weight: 400;
+  }
+
+  .scissors {
+    font-size: 8px;
+    margin-left: 2px;
+  }
+
+  .connector-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .connector {
+    flex: 1;
+    height: 10px;
+    border-left: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    max-width: 60px;
+    align-self: flex-end;
+  }
+
+  /* legend */
+  .legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+  }
+
+  .leg-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    border: 1px solid;
+    flex-shrink: 0;
+  }
+
+  .game-link-box {
+    margin-top: 10px;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+  }
+
+  .game-link-label {
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .game-link-url {
+    color: var(--green);
+    background: rgba(6,214,160,0.08);
+    border: 1px solid rgba(6,214,160,0.25);
+    border-radius: 4px;
+    padding: 3px 10px;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-stack {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .tech-chip {
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .footer-concept {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  .score-banner {
+    background: linear-gradient(90deg, rgba(6,214,160,0.15), rgba(67,97,238,0.15));
+    border: 1px solid rgba(6,214,160,0.25);
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  @media print {
+    body { margin: 0; width: 210mm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">AlphaFour</div>
+    <div class="tagline">Connect 4 AI · Minimax + Alpha-Beta Pruning Visualizer</div>
+  </div>
+  <div class="header-right">
+    <div class="meta">FT3 App Dev &nbsp;&middot;&nbsp; AI &amp; Data Structures</div>
+  </div>
+</div>
+
+<!-- ── MID THREE COLUMNS ── -->
+<div class="mid">
+
+  <!-- Col 1: Problem Statement -->
+  <div class="card">
+    <div class="card-title"><span style="background:var(--red)"></span>Problem Statement</div>
+    <div class="prob-title">Adversarial Search in a Two-Player Zero-Sum Game</div>
+    <div class="prob-body">Connect 4 is a classic toy problem: two players drop discs into a 7-column grid; first to place 4 in a row wins. For an AI this is a fully observable, deterministic, adversarial search problem requiring look-ahead reasoning.</div>
+    <div class="trait-row">
+      <div class="trait"><span class="trait-dot" style="background:#e63946"></span>State space: 6×7 board = 4.5 trillion positions</div>
+      <div class="trait"><span class="trait-dot" style="background:#f4a261"></span>Branching factor: up to 7 (non-full columns)</div>
+      <div class="trait"><span class="trait-dot" style="background:#4361ee"></span>Operators: drop disc into any valid column</div>
+      <div class="trait"><span class="trait-dot" style="background:#06d6a0"></span>Goal: 4 consecutive discs of same colour</div>
+      <div class="trait"><span class="trait-dot" style="background:#c084fc"></span>Agents: MAX (AI) vs MIN (player) — zero-sum</div>
+    </div>
+  </div>
+
+  <!-- Col 2: Board screenshot -->
+  <div class="card">
+    <div class="card-title"><span style="background:var(--amber)"></span>Live Game Interface</div>
+    <div class="board-wrap">
+      <div class="board-status">&#11044; AI WINS — Depth 6 · 43ms · 1,247 nodes</div>
+      <div class="board-grid">
+        <!-- Row 0 (top) -->
+        <div class="board-row">
+          <div class="cell"></div><div class="cell"></div><div class="cell red"></div><div class="cell amber"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        </div>
+        <div class="board-row">
+          <div class="cell"></div><div class="cell red"></div><div class="cell amber"></div><div class="cell red"></div><div class="cell amber"></div><div class="cell"></div><div class="cell"></div>
+        </div>
+        <div class="board-row">
+          <div class="cell red"></div><div class="cell amber"></div><div class="cell red"></div><div class="cell amber"></div><div class="cell red"></div><div class="cell amber"></div><div class="cell"></div>
+        </div>
+        <div class="board-row">
+          <div class="cell amber"></div><div class="cell red"></div><div class="cell amber"></div><div class="cell red"></div><div class="cell amber win"></div><div class="cell red"></div><div class="cell amber"></div>
+        </div>
+        <div class="board-row">
+          <div class="cell red"></div><div class="cell amber"></div><div class="cell red"></div><div class="cell amber win"></div><div class="cell red"></div><div class="cell amber"></div><div class="cell red"></div>
+        </div>
+        <div class="board-row">
+          <div class="cell amber"></div><div class="cell red"></div><div class="cell amber win"></div><div class="cell red"></div><div class="cell amber"></div><div class="cell red"></div><div class="cell amber win"></div>
+        </div>
+      </div>
+      <div class="col-labels">
+        <div class="col-label">1</div><div class="col-label">2</div><div class="col-label">3</div>
+        <div class="col-label">4</div><div class="col-label">5</div><div class="col-label">6</div><div class="col-label">7</div>
+      </div>
+
+      <!-- Mini tree -->
+      <div class="tree-mini" style="width:100%">
+        <div class="tree-level">
+          <div class="tnode tnode-max">MAX<span class="tree-score">α=−∞ β=+∞</span></div>
+        </div>
+        <div class="tree-level">
+          <div class="tnode tnode-min">MIN<span class="tree-score">+82</span></div>
+          <div class="tnode tnode-best">MIN ★<span class="tree-score">+210</span></div>
+          <div class="tnode tnode-prune">MIN ✂<span class="tree-score">pruned</span></div>
+        </div>
+        <div class="tree-level">
+          <div class="tnode tnode-max" style="font-size:8px">MAX<span class="tree-score">+45</span></div>
+          <div class="tnode tnode-max" style="font-size:8px">MAX<span class="tree-score">+210</span></div>
+        </div>
+      </div>
+      <div class="game-link-box">
+        <span class="game-link-label">Live App</span>
+        <span class="game-link-url">alphafour.vercel.app</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Col 3: Algorithm -->
+  <div class="card">
+    <div class="card-title"><span style="background:var(--green)"></span>Algorithm</div>
+
+    <div class="algo-section">
+      <div class="algo-heading">Minimax</div>
+      <div class="pseudocode"><span class="kw">function</span> <span class="fn">minimax</span>(board, depth, α, β, isMax):
+  <span class="kw">if</span> depth == <span class="val">0</span> <span class="kw">or</span> terminal:
+    <span class="kw">return</span> <span class="fn">heuristic</span>(board)
+  <span class="kw">if</span> isMax:
+    score = <span class="val">−∞</span>
+    <span class="kw">for</span> move <span class="kw">in</span> validMoves:
+      score = max(score, <span class="fn">minimax</span>(...<span class="val">false</span>))
+      α = max(α, score)
+      <span class="kw">if</span> <span class="cond">β ≤ α</span>: <span class="kw">break</span> <span class="cm">// prune</span>
+  <span class="kw">else</span>:
+    score = <span class="val">+∞</span>
+    <span class="kw">for</span> move <span class="kw">in</span> validMoves:
+      score = min(score, <span class="fn">minimax</span>(...<span class="val">true</span>))
+      β = min(β, score)
+      <span class="kw">if</span> <span class="cond">β ≤ α</span>: <span class="kw">break</span> <span class="cm">// prune</span></div>
+    </div>
+
+    <div class="algo-section">
+      <div class="algo-heading">Heuristic Scores</div>
+      <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:9.5px;color:#b0aec8">
+        <tr><td style="padding:2px 0;color:var(--amber)">AI wins (4-in-row)</td><td style="text-align:right;color:var(--green)">+100,000</td></tr>
+        <tr><td style="padding:2px 0;color:var(--red)">Player wins</td><td style="text-align:right;color:var(--red)">−100,000</td></tr>
+        <tr><td style="padding:2px 0">AI 3-in-row + open end</td><td style="text-align:right;color:var(--green)">+10</td></tr>
+        <tr><td style="padding:2px 0">AI 2-in-row + open ends</td><td style="text-align:right;color:var(--green)">+3</td></tr>
+        <tr><td style="padding:2px 0">Player 3-in-row + open</td><td style="text-align:right;color:var(--red)">−10</td></tr>
+        <tr><td style="padding:2px 0">AI disc in centre col</td><td style="text-align:right;color:var(--green)">+3</td></tr>
+      </table>
+    </div>
+
+    <div class="algo-section">
+      <div class="algo-heading" style="margin-top:6px">Complexity</div>
+      <div style="font-family:var(--mono);font-size:9.5px;color:#b0aec8;line-height:1.7">
+        Without pruning: <span style="color:var(--red)">O(b<sup>d</sup>)</span> · 7<sup>6</sup> = 117,649 nodes<br>
+        With α-β pruning: <span style="color:var(--green)">O(b<sup>d/2</sup>)</span> · ~343 nodes<br>
+        Pruning efficiency: <span style="color:var(--green)">~70% reduction</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ALGORITHM FLOW ── -->
+<div class="flow-section">
+  <div class="flow-title"><span></span>Algorithm execution flow</div>
+  <div class="flow-row">
+    <div class="flow-node">
+      <div class="flow-box fn-player">Player drops disc</div>
+      <div class="flow-sub">Human move</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-box fn-board">Board state updated</div>
+      <div class="flow-sub">2D array copy</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-box fn-max">MAX node (AI)</div>
+      <div class="flow-sub">Depth = 6, α=−∞</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-box fn-min">MIN node (player)</div>
+      <div class="flow-sub">Simulate opponent</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-box fn-prune">β ≤ α? Prune ✂</div>
+      <div class="flow-sub">Skip subtree</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-box fn-leaf">Depth 0: heuristic</div>
+      <div class="flow-sub">Score leaf node</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-box fn-pick">AI picks best col</div>
+      <div class="flow-sub">Max guaranteed score</div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ── FOOTER ── -->
+<div class="footer">
+  <div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.08em">Tech Stack</div>
+    <div class="footer-stack">
+      <span class="tech-chip">Next.js 14</span>
+      <span class="tech-chip">TypeScript</span>
+      <span class="tech-chip">Tailwind CSS</span>
+      <span class="tech-chip">Framer Motion</span>
+      <span class="tech-chip">React SVG</span>
+      <span class="tech-chip">Vercel</span>
+    </div>
+  </div>
+  <div style="text-align:right">
+    <div class="team-label" style="margin-bottom:4px">Team</div>
+    <div class="team-names" style="margin-bottom:3px">Shaurya Ojha &nbsp;&middot;&nbsp; Swarali Patil &nbsp;&middot;&nbsp; Aryan Sharma</div>
+    <div class="faculty-line">Faculty: <span>Dr Vidhya S</span> &nbsp;&middot;&nbsp; Section E2</div>
+  </div>
+</div>
+
+</body>
+</html>
