@@ -21,7 +21,7 @@ export default function DashboardPage() {
           </button>
         </div>
       </header>
-      
+
       {/* SideNavBar */}
       <aside className="fixed left-0 top-14 h-[calc(100vh-56px)] w-60 bg-[#0E0E0E] border-r border-[#1C1B1B] hidden lg:flex flex-col">
         <div className="p-6 border-b border-[#1C1B1B]">
@@ -55,21 +55,21 @@ export default function DashboardPage() {
           </Link>
         </div>
       </aside>
-      
+
       {/* Main Content */}
       <main className="lg:ml-60 pt-14 pb-12 p-6 min-h-screen">
         <div className="max-w-6xl mx-auto py-8">
           {/* Hero Section */}
           <section className="mb-16">
             <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-[0.9] uppercase mb-6 font-headline">
-              Connect 4 AI<br/>
+              Connect 4 AI<br />
               <span className="text-[#474747]">Minimax Visualizer</span>
             </h1>
             <p className="text-[#919191] text-sm max-w-xl leading-relaxed">
               Watch an AI think in real time. AlphaFour uses the Minimax algorithm with Alpha-Beta pruning to play Connect 4 optimally, and visualizes the entire decision tree so you can see exactly how it evaluates every possible future.
             </p>
             <Link href="/game" className="inline-flex items-center gap-3 mt-8 bg-white text-black font-bold text-[11px] px-8 py-4 uppercase tracking-[0.2em] hover:bg-[#E5E2E1] transition-colors active:scale-[0.98]">
-              <span className="material-symbols-outlined text-lg" style={{fontVariationSettings: "'FILL' 1"}}>play_arrow</span>
+              <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
               START PLAYING
             </Link>
           </section>
@@ -120,6 +120,28 @@ export default function DashboardPage() {
               stat="1→8"
               statLabel="Depth Range"
             />
+          </section>
+
+          {/* Expo Features Selection */}
+          <section className="mb-16">
+            <div className="flex items-baseline gap-4 mb-6">
+              <span className="text-4xl font-black text-[#1C1B1B]">12</span>
+              <h2 className="text-sm font-bold text-white uppercase tracking-[0.15em]">Unique Features</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <ExpoFeatureCard title="Real-Time Multiplayer" icon="public" desc="Play against anyone globally via WebSockets." />
+              <ExpoFeatureCard title="AI Move Narrator" icon="record_voice_over" desc="Claude-3 generated English explanations for moves." />
+              <ExpoFeatureCard title="Algorithm Compare" icon="compare_arrows" desc="Side-by-side pure Minimax vs Alpha-Beta." />
+              <ExpoFeatureCard title="Opening Theory" icon="menu_book" desc="Hardcoded optimal opening sequences." />
+              <ExpoFeatureCard title="Heuristic Heatmap" icon="grid_on" desc="Visual evaluation of column attractiveness." />
+              <ExpoFeatureCard title="Iterative Deepening" icon="layers" desc="Progressive depth search up to physical limits." />
+              <ExpoFeatureCard title="Replay Timeline" icon="history" desc="Scrub through move history and analyze past positions." />
+              <ExpoFeatureCard title="AI vs AI Auto-Play" icon="smart_toy" desc="Mesmerizing screensaver pitting AIs against each other." />
+              <ExpoFeatureCard title="Threat Highlights" icon="warning" desc="Dotted arrows showing spotted and blocked 3-in-a-rows." />
+              <ExpoFeatureCard title="Animated Node Build" icon="animation" desc="Real-time node-by-node rendering of the search tree." />
+              <ExpoFeatureCard title="Pruning Efficiency" icon="monitoring" desc="Real-time graphs charting alpha-beta node savings." />
+              <ExpoFeatureCard title="Auto-Calibration EL0" icon="trending_up" desc="Dynamic difficulty adapting to your play style." />
+            </div>
           </section>
 
           {/* Algorithm Preview */}
@@ -192,7 +214,7 @@ export default function DashboardPage() {
         href="/game"
         className="fixed bottom-12 right-8 w-14 h-14 bg-white flex items-center justify-center text-black z-40 transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.15)]"
       >
-        <span className="material-symbols-outlined text-2xl" style={{fontVariationSettings: "'FILL' 1"}}>play_arrow</span>
+        <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
       </Link>
     </>
   );
@@ -207,7 +229,7 @@ function FeatureCard({ icon, title, description, stat, statLabel }: {
 }) {
   return (
     <div className="bg-[#0E0E0E] border border-[#1C1B1B] p-6 group hover:border-[#474747] transition-colors">
-      <span className="material-symbols-outlined text-white text-2xl mb-4 block" style={{fontVariationSettings: "'FILL' 0, 'wght' 200"}}>{icon}</span>
+      <span className="material-symbols-outlined text-white text-2xl mb-4 block" style={{ fontVariationSettings: "'FILL' 0, 'wght' 200" }}>{icon}</span>
       <h3 className="text-xs font-bold text-white uppercase tracking-[0.15em] mb-2">{title}</h3>
       <p className="text-[10px] text-[#919191] leading-relaxed mb-4">{description}</p>
       <div className="flex items-end gap-2 pt-3 border-t border-[#1C1B1B]">
@@ -223,6 +245,18 @@ function SyllabusItem({ unit, topics }: { unit: string; topics: string }) {
     <div className="space-y-1">
       <div className="text-[9px] font-bold text-white uppercase tracking-[0.2em]">{unit}</div>
       <p className="text-[10px] text-[#919191] leading-relaxed">{topics}</p>
+    </div>
+  );
+}
+
+function ExpoFeatureCard({ title, icon, desc }: { title: string, icon: string, desc: string }) {
+  return (
+    <div className="bg-[#0E0E0E] border border-[#1C1B1B] p-5 group hover:border-[#474747] transition-all hover:-translate-y-1">
+      <div className="flex items-center gap-3 mb-3">
+        <span className="material-symbols-outlined text-[#f4a261] text-xl" style={{ fontVariationSettings: "'FILL' 0, 'wght' 200" }}>{icon}</span>
+        <h4 className="text-[10px] font-bold text-white uppercase tracking-wider">{title}</h4>
+      </div>
+      <p className="text-[9px] text-[#919191] leading-relaxed">{desc}</p>
     </div>
   );
 }
