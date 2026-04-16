@@ -1,28 +1,82 @@
 // ─── Minimax with Alpha-Beta Pruning + Full Tree Recording ───
 // This module implements the core AI algorithm. It stores the ENTIRE
 // search tree so the visualizer can render every explored node.
+// Feature 3: Records visit order for animated node-by-node tree build.
+// Feature 4: Checks the opening book before running Minimax.
 
 import { BoardState, SearchNode, PerformanceStats } from './types';
 import { getValidMoves, makeMove, isTerminalNode } from './board';
 import { evaluateBoard } from './heuristic';
+import { lookupBook } from './openingBook';
 
 let globalStats = {
   nodesEvaluated: 0,
   nodesPruned: 0
 };
 let nodeCounter = 0;
+let visitCounter = 0; // Feature 3: visit order for animation stagger
 
 /**
  * Entry point: runs Minimax from the current board and returns
  * the best column, the full search tree, and performance stats.
+ *
+ * Feature 4: Checks opening book first. Returns bookMove flag.
  */
 export function getBestMoveMinimax(
   board: BoardState,
   depth: number
-): { move: number; tree: SearchNode; stats: PerformanceStats } {
+): { move: number; tree: SearchNode; stats: PerformanceStats; isBookMove: boolean; bookMoveName?: string } {
   globalStats.nodesEvaluated = 0;
   globalStats.nodesPruned = 0;
   nodeCounter = 0;
+  visitCounter = 0;
+
+  // ── Feature 4: Opening Book Check ──
+  const bookEntry = lookupBook(board);
+  if (bookEntry) {
+    // Validate the book move is still legal
+    const validMoves = getValidMoves(board);
+    if (validMoves.includes(bookEntry.col)) {
+      // Create a minimal synthetic tree node for the visualizer
+      const syntheticTree: SearchNode = {
+        id: 'book-root',
+        score: 0,
+        alpha: -Infinity,
+        beta: Infinity,
+        depth,
+        move: null,
+        pruned: false,
+        isMax: true,
+        isTerminal: false,
+        isBestPath: true,
+        visitOrder: 0,
+        children: [{
+          id: 'book-move',
+          score: 999,
+          alpha: -Infinity,
+          beta: Infinity,
+          depth: depth - 1,
+          move: bookEntry.col,
+          pruned: false,
+          isMax: false,
+          isTerminal: false,
+          isBestPath: true,
+          visitOrder: 1,
+          children: [],
+          board: makeMove(board, bookEntry.col, 'YELLOW')
+        }],
+        board
+      };
+      const stats: PerformanceStats = {
+        nodesEvaluated: 1,
+        nodesPruned: 0,
+        searchDepth: depth,
+        timeTakenMs: 0,
+        pruningEfficiency: 0
+      };
+      return { move: bookEntry.col, tree: syntheticTree, stats, isBookMove: true, bookMoveName: bookEntry.name };
+    }
+  }
 
   const startTime = performance.now();
   const treeRoot = minimax(board, depth, -Infinity, Infinity, true, null);
@@ -68,7 +122,7 @@ export function getBestMoveMinimax(
     pruningEfficiency: Number(pruningEfficiency.toFixed(1))
   };
 
-  return { move: bestMove, tree: treeRoot, stats };
+  return { move: bestMove, tree: treeRoot, stats, isBookMove: false };
 }
 
 /**
@@ -101,6 +155,7 @@ function markBestPathRecursive(node: SearchNode): void {
 /**
  * Core Minimax with Alpha-Beta Pruning (recursive).
  * Records every node in the search tree for the visualizer.
+ * Feature 3: assigns visitOrder to each node for staggered animation.
  */
 function minimax(
   board: BoardState,
@@ -111,6 +166,8 @@ function minimax(
   moveMade: number | null
 ): SearchNode {
   nodeCounter++;
+  visitCounter++;
+  const myVisitOrder = visitCounter; // Feature 3: snapshot visit order
   const terminal = isTerminalNode(board);
 
   const node: SearchNode = {
@@ -124,6 +181,7 @@ function minimax(
     isMax: isMaximizing,
     isTerminal: terminal,
     isBestPath: false,
+    visitOrder: myVisitOrder, // Feature 3
     children: [],
     board
   };
@@ -156,6 +214,7 @@ function minimax(
         const currentIndex = validMoves.indexOf(move);
         for (let i = currentIndex + 1; i < validMoves.length; i++) {
           nodeCounter++;
+          visitCounter++;
           const prunedMove = validMoves[i];
           node.children.push({
             id: `node-${nodeCounter}`,
@@ -168,6 +227,7 @@ function minimax(
             isMax: false,
             isTerminal: false,
             isBestPath: false,
+            visitOrder: visitCounter,
             children: [],
             board: makeMove(board, prunedMove, 'YELLOW')
           });
@@ -196,6 +256,7 @@ function minimax(
         const currentIndex = validMoves.indexOf(move);
         for (let i = currentIndex + 1; i < validMoves.length; i++) {
           nodeCounter++;
+          visitCounter++;
           const prunedMove = validMoves[i];
           node.children.push({
             id: `node-${nodeCounter}`,
@@ -208,6 +269,7 @@ function minimax(
             isMax: true,
             isTerminal: false,
             isBestPath: false,
+            visitOrder: visitCounter,
             children: [],
             board: makeMove(board, prunedMove, 'RED')
           });

@@ -2,7 +2,7 @@
 
 export type Player = 'RED' | 'YELLOW' | null;
 export type BoardState = Player[][];
-export type GameMode = 'pvai' | 'aivai' | 'pvp';
+export type GameMode = 'pvai' | 'aivai' | 'pvp' | 'online';
 
 export interface SearchNode {
   id: string;

@@ -7,7 +7,17 @@ interface TreeVisualizerProps {
   prunedHidden: boolean;
   onNodeClick?: (n: SearchNode) => void;
   maxDepthToShow?: number;
+  // Feature 3: animated node-by-node build
+  animationSpeed?: 'slow' | 'medium' | 'fast' | 'instant';
 }
+
+// Feature 3: stagger delay per visit index based on speed setting
+const SPEED_DELAY: Record<string, number> = {
+  slow: 40,
+  medium: 20,
+  fast: 8,
+  instant: 0,
+};
 
 /**
  * Renders the AI's Minimax decision tree as a recursive
@@ -17,12 +27,14 @@ interface TreeVisualizerProps {
  * - MIN nodes (Player) have gray borders
  * - Pruned branches are faded with ✂ badges
  * - Best path is highlighted with white glow
+ * - Feature 3: Each node fades in staggered by visit order
  */
 export default function TreeVisualizer({
   tree,
   prunedHidden,
   onNodeClick = () => {},
-  maxDepthToShow = 4
+  maxDepthToShow = 4,
+  animationSpeed = 'fast',
 }: TreeVisualizerProps) {
   if (!tree) {
     return (
@@ -33,6 +45,8 @@ export default function TreeVisualizer({
       </div>
     );
   }
+
+  const staggerMs = SPEED_DELAY[animationSpeed] ?? 20;
 
   return (
     <div
@@ -62,6 +76,13 @@ export default function TreeVisualizer({
         .tree-children-has-best {
           border-top-color: rgba(255,255,255,0.2) !important;
         }
+        @keyframes node-appear {
+          from { opacity: 0; transform: scale(0.85) translateY(-4px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .tree-node-animated {
+          animation: node-appear 0.25s ease-out both;
+        }
       `}} />
       <div className="min-w-max pb-8 pt-2">
         <RenderNode
@@ -71,6 +92,7 @@ export default function TreeVisualizer({
           isRoot={true}
           currentDepth={0}
           maxDepth={maxDepthToShow}
+          staggerMs={staggerMs}
         />
       </div>
     </div>
@@ -83,7 +105,8 @@ function RenderNode({
   onClick,
   isRoot = false,
   currentDepth,
-  maxDepth
+  maxDepth,
+  staggerMs,
 }: {
   node: SearchNode;
   prunedHidden: boolean;
@@ -91,6 +114,7 @@ function RenderNode({
   isRoot?: boolean;
   currentDepth: number;
   maxDepth: number;
+  staggerMs: number;
 }) {
   if (prunedHidden && node.pruned) return null;
   if (currentDepth >= maxDepth && !isRoot) return null;
@@ -105,8 +129,14 @@ function RenderNode({
   const hasMore = visibleChildren.length > maxChildren;
   const hasBestChild = displayChildren.some(c => c.isBestPath);
 
+  // Feature 3: animation delay based on visit order
+  const delayMs = staggerMs > 0 ? (node.visitOrder ?? 0) * staggerMs : 0;
+
   return (
-    <div className="tree-container">
+    <div
+      className={`tree-container ${staggerMs > 0 ? 'tree-node-animated' : ''}`}
+      style={staggerMs > 0 ? { animationDelay: `${delayMs}ms` } : {}}
+    >
       <TreeNode node={node} isRoot={isRoot} onClick={onClick} />
 
       {displayChildren.length > 0 && currentDepth < maxDepth - 1 && (
@@ -122,6 +152,7 @@ function RenderNode({
                 onClick={onClick}
                 currentDepth={currentDepth + 1}
                 maxDepth={maxDepth}
+                staggerMs={staggerMs}
               />
             </div>
           ))}

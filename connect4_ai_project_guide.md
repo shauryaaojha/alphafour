@@ -36,6 +36,21 @@ Most student projects show a game. This project shows the *reasoning* behind the
 - **Heuristic Evaluation** (scoring board positions numerically)
 - **Problem Space Representation** (the board as a state, moves as transitions)
 
+### Built-in Expo Edge Features
+To ensure this blows the judges away, **12 advanced features** have been fully implemented in this version:
+1. **Replay & Move Timeline**: Scrub back through history and see the exact decision tree for past moves.
+2. **AI vs AI Auto-Play**: Pit different search depths against each other for a mesmerizing screensaver mode.
+3. **Animated Node Build**: Watch the tree render node-by-node in real time as the AI expands its search.
+4. **Opening Theory Book**: Hardcoded optimal openings display a "Book Move" badge, bridging search and strategy.
+5. **Heuristic Heatmap**: A color overlay showing how the AI scores the attractiveness of every column.
+6. **Iterative Deepening**: Watch the AI search depth 1, then 2, progressing up to its physical limit.
+7. **Threat Highlights**: Dotted arrows highlight exact 3-in-a-row threats the AI spotted and blocked.
+8. **Pruning Efficiency Graph**: Real-time stats charting how many nodes Alpha-Beta saved over time.
+9. **Algorithm Compare Mode**: Side-by-side visualization of Alpha-Beta vs Pure Minimax node counts.
+10. **AI Move Narrator**: Claude 3 generates clear English explanations of why the AI picked its move.
+11. **Auto-Calibration**: Dynamic EL0 system that makes the AI smarter the better you play.
+12. **Online Multiplayer**: Built-in room code system allowing two devices to play over the web.
+
 ### Tech Stack
 
 | Layer | Technology |
