@@ -22,6 +22,9 @@ interface ControlPanelProps {
   // Feature 5: Heatmap
   showHeatmap: boolean;
   setShowHeatmap: (v: boolean) => void;
+  // Feature 13: Hint
+  showHint?: boolean;
+  setShowHint?: (v: boolean) => void;
   // Feature 6: Iterative deepening
   iterativeMode: boolean;
   setIterativeMode: (v: boolean) => void;
@@ -63,6 +66,7 @@ export default function ControlPanel({
   aiVsAiWins,
   animationSpeed, setAnimationSpeed,
   showHeatmap, setShowHeatmap,
+  showHint, setShowHint,
   iterativeMode, setIterativeMode,
   currentIterativeDepth, currentIterativeBestCol,
   showThreats, setShowThreats,
@@ -256,6 +260,11 @@ export default function ControlPanel({
 
         {/* Feature 5: Heatmap */}
         <Toggle label="Heatmap" subtitle="Column score overlay" value={showHeatmap} onChange={setShowHeatmap} />
+
+        {/* Feature 13: Hint Section */}
+        {showHint !== undefined && setShowHint !== undefined && (
+          <Toggle label="Hint" subtitle="Show best move" value={showHint} onChange={setShowHint} />
+        )}
 
         {/* Feature 7: Threat highlights */}
         <Toggle label="Threats" subtitle="3-in-a-row highlights" value={showThreats} onChange={setShowThreats} />
