@@ -89,6 +89,19 @@ export default function GamePage() {
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [heatmapData, setHeatmapData] = useState<number[] | null>(null);
 
+  // ─── Feature 13: Hint ───
+  const [showHint, setShowHint] = useState(false);
+  const [hintCol, setHintCol] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (showHint && status === 'PLAYING') {
+      const bestMove = getBestMoveMinimax(board, depth);
+      setHintCol(bestMove.move);
+    } else {
+      setHintCol(null);
+    }
+  }, [showHint, board, depth, currentPlayer, status]);
+
   // ─── Feature 6: Iterative deepening ───
   const [iterativeMode, setIterativeMode] = useState(false);
   const [currentIterativeDepth, setCurrentIterativeDepth] = useState<number | undefined>(undefined);
@@ -165,6 +178,9 @@ export default function GamePage() {
       setOnlineRoomCode('');
       setOnlinePlayerColor(null);
       setIsRoomCreator(false);
+      sessionStorage.removeItem('alphafour_roomCode');
+      sessionStorage.removeItem('alphafour_playerColor');
+      sessionStorage.removeItem('alphafour_isCreator');
     }
     
     gameStartMoveRef.current = moveNumber;
@@ -581,6 +597,27 @@ export default function GamePage() {
       })()
     : null;
 
+  // ─── Feature 12: Auto-refresh persistence ───
+  useEffect(() => {
+    // Save to session storage whenever these change
+    if (gameMode === 'online' && onlineRoomCode) {
+      sessionStorage.setItem('alphafour_roomCode', onlineRoomCode);
+      sessionStorage.setItem('alphafour_playerColor', onlinePlayerColor || '');
+      sessionStorage.setItem('alphafour_isCreator', isRoomCreator.toString());
+    }
+  }, [gameMode, onlineRoomCode, onlinePlayerColor, isRoomCreator]);
+
+  useEffect(() => {
+    // Load from session storage on mount
+    const savedRoom = sessionStorage.getItem('alphafour_roomCode');
+    if (savedRoom && !onlineRoomCode) {
+      setGameMode('online');
+      setOnlineRoomCode(savedRoom);
+      setOnlinePlayerColor(sessionStorage.getItem('alphafour_playerColor') as Player);
+      setIsRoomCreator(sessionStorage.getItem('alphafour_isCreator') === 'true');
+    }
+  }, []);
+
   // ─── Feature 12: Online Polling ───
   useEffect(() => {
     if (gameMode !== 'online' || !onlineRoomCode) return;
@@ -769,6 +806,8 @@ export default function GamePage() {
             setAnimationSpeed={setAnimationSpeed}
             showHeatmap={showHeatmap}
             setShowHeatmap={setShowHeatmap}
+            showHint={showHint}
+            setShowHint={setShowHint}
             iterativeMode={iterativeMode}
             setIterativeMode={setIterativeMode}
             currentIterativeDepth={currentIterativeDepth}
@@ -832,6 +871,28 @@ export default function GamePage() {
                     <span className="text-[9px] font-mono uppercase text-[#f4a261] tracking-[0.1em] font-bold">{!isRoomCreator ? 'You' : 'Opponent'}</span>
                   </div>
                 </div>
+
+                {status !== 'PLAYING' && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch('/api/rooms/reset', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ code: onlineRoomCode })
+                        });
+                        if (res.ok) {
+                          // Board state will update on next poll tick
+                        }
+                      } catch(e) {
+                        console.error('Failed to rematch', e);
+                      }
+                    }}
+                    className="ml-4 px-3 py-1 bg-white text-black font-bold font-mono text-xs uppercase tracking-widest hover:bg-gray-200 transition-colors"
+                  >
+                    Rematch
+                  </button>
+                )}
               </div>
             ) : gameMode === 'pvp' && getStatusLabel() ? (
               <div className="bg-[#0E0E0E] border border-[#1C1B1B] px-4 py-3 flex items-center justify-between">
@@ -962,6 +1023,8 @@ export default function GamePage() {
                 replayMoveCell={replayMoveCell}
                 heatmap={heatmapData}
                 showHeatmap={showHeatmap}
+                hintCol={hintCol}
+                showHint={showHint}
                 threats={threats}
                 showThreats={showThreats}
               />
@@ -1052,6 +1115,8 @@ export default function GamePage() {
                 setAnimationSpeed={setAnimationSpeed}
                 showHeatmap={showHeatmap}
                 setShowHeatmap={setShowHeatmap}
+                showHint={showHint}
+                setShowHint={setShowHint}
                 iterativeMode={iterativeMode}
                 setIterativeMode={setIterativeMode}
                 currentIterativeDepth={currentIterativeDepth}
