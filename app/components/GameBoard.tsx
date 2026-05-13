@@ -17,6 +17,9 @@ interface GameBoardProps {
   // Feature 7: Threat highlights
   threats?: ThreatWindow[];
   showThreats?: boolean;
+  // Feature 13: Hint
+  hintCol?: number | null;
+  showHint?: boolean;
 }
 
 /**
@@ -37,6 +40,8 @@ export default function GameBoard({
   showHeatmap = false,
   threats = [],
   showThreats = false,
+  hintCol = null,
+  showHint = false,
 }: GameBoardProps) {
 
   // Build a threat lookup: which cells are highlighted for threats
@@ -115,6 +120,9 @@ export default function GameBoard({
             const isReplayMove = replayMoveCell?.r === r && replayMoveCell?.c === c;
             const threatColor = threatCellMap.get(`${r},${c}`);
 
+            // Check if this cell is the hint placement (first empty cell from bottom in hintCol)
+            const isHintCell = showHint && hintCol === c && cell === null && (r === 5 || board[r + 1][c] !== null);
+
             return (
               <div
                 key={`${r}-${c}`}
@@ -141,6 +149,8 @@ export default function GameBoard({
                   <div className={`w-full h-full ${isWinning ? 'animate-pulse' : ''}`}>
                     <Disc player={cell} />
                   </div>
+                ) : isHintCell ? (
+                  <div className="w-full h-full border-[3px] border-dashed border-white rounded-full animate-pulse opacity-50" />
                 ) : null}
 
                 {/* Feature 1: Replay move highlight ring */}
